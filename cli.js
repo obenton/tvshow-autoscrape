@@ -5,6 +5,7 @@ const child_process = require('child_process')
 const localEpisodes = require('./lib/local-episodes')
 const epguidesScraper = require('./lib/scrapers/epguides')
 const piratebayScraper = require('./lib/scrapers/piratebay')
+const unbox = require('./lib/unbox');
 
 async function getMagnetLinksAndLaunchTransmission (pathToShow) {
   const showName = path.basename(pathToShow)
@@ -31,6 +32,17 @@ async function getMagnetLinksAndLaunchTransmission (pathToShow) {
 }
 
 if (process.argv.length >= 3) {
+  if (process.argv[2] === '-u') {
+    // Unbox mode. Expect path to all tv shows as second param.
+    if (process.argv.length >= 4) {
+      const tvshowsPath = process.argv[3];
+      unbox(tvshowsPath);
+    } else {
+      console.log('Usage for unbox mode: npm run unbox /path/to/all/tvshows/');
+    }
+  }
+  return;
+
   const pathToShow = process.argv[2]
   if (fs.existsSync(pathToShow)) {
     getMagnetLinksAndLaunchTransmission(pathToShow)
