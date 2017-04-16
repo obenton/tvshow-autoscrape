@@ -40,14 +40,14 @@ if (process.argv.length >= 3) {
     } else {
       console.log('Usage for unbox mode: npm run unbox /path/to/all/tvshows/');
     }
-  }
-  return;
-
-  const pathToShow = process.argv[2]
-  if (fs.existsSync(pathToShow)) {
-    getMagnetLinksAndLaunchTransmission(pathToShow)
   } else {
-    console.log(`Directory not found: ${pathToShow}`)
+    // Download mode. Expect path to tv show as second param.
+    const pathToShow = process.argv[2]
+    if (fs.existsSync(pathToShow)) {
+      getMagnetLinksAndLaunchTransmission(pathToShow)
+    } else {
+      console.log(`Directory not found: ${pathToShow}`)
+    }
   }
 } else {
   console.log('Usage: npm start /path/to/tv/show')
