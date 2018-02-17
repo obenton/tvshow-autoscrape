@@ -1,50 +1,31 @@
 const fs = require('fs')
-const path = require('path')
-const debug = require('debug')('cli')
-const child_process = require('child_process')
-const localEpisodes = require('./lib/local-episodes')
-const epguidesScraper = require('./lib/scrapers/epguides')
-const piratebayScraper = require('./lib/scrapers/piratebay')
+const findMagnetLinks = require('./lib/find-magnet-links').findMagnetLinks
 const unbox = require('./lib/unbox');
+const autoIndex = require('./lib/auto-index');
 
-async function getMagnetLinksAndLaunchTransmission (pathToShow) {
-  const showName = path.basename(pathToShow)
-
-  debug(`Finding latest local episode for "${showName}"`)
-  const [season, episode] = localEpisodes.findLatest(pathToShow)
-
-  debug('Getting episode list for', showName)
-  const missingAiredEpisodes = await epguidesScraper.findMissingAiredEpisodes(showName, season, episode)
-
-  if (missingAiredEpisodes.length === 0) {
-    debug(`All aired episodes of "${showName}" have been found locally. Nothing to do.`)
-    process.exit(0)
-  }
-
-  debug('Getting magnet links for', showName)
-  const magnetLinks = await piratebayScraper.getMagnetLinksForEpisodes(showName, missingAiredEpisodes)
-
-  debug(`Launching Transmission with ${magnetLinks.length} magnet links`)
-  for (let link of magnetLinks) {
-    const command = `open /Applications/Transmission.app/ "${link}"`
-    child_process.execSync(command)
-  }
-}
+const modes = new Set(['-u', '-a']);
 
 if (process.argv.length >= 3) {
-  if (process.argv[2] === '-u') {
-    // Unbox mode. Expect path to all tv shows as second param.
+  const mode = process.argv[2];
+  if (modes.has(mode)) {
+    // Unbox or auto-indexing mode. Expect path to all tv shows as second param.
     if (process.argv.length >= 4) {
       const tvshowsPath = process.argv[3];
-      unbox(tvshowsPath);
+      if (mode === '-u') {
+        unbox(tvshowsPath);
+      }
+      if (mode === '-a') {
+        autoIndex(tvshowsPath)
+      }
     } else {
-      console.log('Usage for unbox mode: npm run unbox /path/to/all/tvshows/');
+      console.log('Usage for unbox mode: npm run unbox /path/to/all/tvshows/')
+      console.log('Usage for auto-indexing mode: npm run auto /path/to/all/tvshows/')
     }
   } else {
     // Download mode. Expect path to tv show as second param.
     const pathToShow = process.argv[2]
     if (fs.existsSync(pathToShow)) {
-      getMagnetLinksAndLaunchTransmission(pathToShow)
+      findMagnetLinks(pathToShow)
     } else {
       console.log(`Directory not found: ${pathToShow}`)
     }

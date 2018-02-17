@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node --harmony cli.js",
     "debug": "DEBUG=cli,local-episodes,epguides-scraper,piratebay-scraper node --harmony cli.js",
-    "unbox": "DEBUG=unbox node --harmony cli.js -u"
+    "unbox": "DEBUG=unbox node --harmony cli.js -u",
+    "auto": "DEBUG=cli,local-episodes,epguides-scraper,piratebay-scraper node --harmony cli.js -a"
   },
   "dependencies": {
     "debug": "2.3.1",
